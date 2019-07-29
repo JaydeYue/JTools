@@ -150,7 +150,7 @@ class Scanner(object):
                     with open(dict[0],"r") as file:
                         for line in file:
                             line = line.strip('\n')
-                            if line not in self.all_trys:
+                            if self.base_url + line + "." + ext not in self.all_trys:
                                 current_dict.put(self.base_url + line + "." + ext)
                                 self.all_trys[line+ "." + ext] = 0
                             elif self.all_trys[line+ "." + ext] == 1:
