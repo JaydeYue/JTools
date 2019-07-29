@@ -8,7 +8,7 @@ DirScanner: A simple directory and sensitive files scanning tool for pen testers
 简单的敏感目录和文件扫描工具
 
 python3 dirscanner.py\
--u http://www.example.com\
+-u http://www.example.com \
 -d path_to_dict1 path_to_dict2\
 -e 1st_extention_added_to_dict2 2st_extention_added_to_dict2\
 -d path_to_dict3\
