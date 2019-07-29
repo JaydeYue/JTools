@@ -7,10 +7,11 @@
 DirScanner: A simple directory and sensitive files scanning tool for pen testers.\
 简单的敏感目录和文件扫描工具
 
-python3 dirscanner.py\
+cd Scanner\
+python3 scan.py\
 -u http://www.example.com \
 -d path_to_dict1 path_to_dict2\
--e 1st_extention_added_to_dict2 2st_extention_added_to_dict2\
+-e 1st_extention_added_to_dict2 2nd_extention_added_to_dict2\
 -d path_to_dict3\
 -c cookie\
 -r referer (default to google)\
@@ -28,3 +29,5 @@ better redirected url handling\
 no overlap option for faster processing\
 changing structure of dict/extension implementation\
 changing stats to display hit rate with status code 200 and hit rate with all other status
+
+find common dicts/sensitive file names
