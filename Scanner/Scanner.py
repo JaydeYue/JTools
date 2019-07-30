@@ -23,6 +23,20 @@ class Scanner(object):
         self.dict_stats = []
         self.redirect_list = {}
 
+        self.process_args(arguments)
+
+        print("base_url: " + self.base_url)
+        print("cookie: " + self.cookie)
+        print("max_retrys: " + str(self.max_retrys))
+        print("max_threads: " + str(self.max_threads))
+        print("time_out: " + str(self.time_out))
+        print("allow_overlap: " + str(self.allow_overlap))
+        print("allow_redirect: " + str(self.allow_redirect))
+        print("scanning_dicts_path_with_added_extensions: ")
+        print(self.dict_paths)
+
+
+    def process_args(self, arguments):
         # base_url, cookie, max_retrys, max_threads, time_out, referer, user, pwd
         arg_processing_tracker = [0,0,0,0,0,0,0,0]
         processing_dic = False
@@ -87,15 +101,19 @@ class Scanner(object):
                     print("Extensions should be added after the dictionary for which the extensions will be applied")
                     exit()
                 else:
-                    self.dict_paths[-1][1].append(arg)
+                    if self.dict_paths[-1][1] == '':
+                        self.dict_paths[-1][1] = arg
+                    else:
+                        self.dict_paths.append([self.dict_paths[-1][0], arg])
             elif processing_dic:
-                self.dict_paths.append((arg, []))
+                self.dict_paths.append([arg, ''])
             else:
                 if not all(count <=2 for count in arg_processing_tracker):
                     print("-u, -c, -mr, -mt, -to could be only used once")
                 else:
                     print("Error processing argument: " + arg )
                 exit()
+
         if not all(count <=2 for count in arg_processing_tracker):
             print("-u, -c, -mr, -mt, -to could be only used once")
             exit()
@@ -105,64 +123,36 @@ class Scanner(object):
         if not self.base_url.endswith('/'):
             self.base_url = self.base_url + '/'
 
-        print("base_url: " + self.base_url)
-        print("cookie: " + self.cookie)
-        print("max_retrys: " + str(self.max_retrys))
-        print("max_threads: " + str(self.max_threads))
-        print("time_out: " + str(self.time_out))
-        print("allow_overlap: " + str(self.allow_overlap))
-        print("allow_redirect: " + str(self.allow_redirect))
-        print("scanning_dicts_path_with_added_extensions: ")
-        print(self.dict_paths)
 
     def run(self):
         print("Scanning...Starts!")
         dict_count = 0
         for dict in self.dict_paths:
-            if len(dict[1]) == 0:
-                self.dict_stats.append(0)
-                threads = []
-                current_dict = queue.Queue()
-                overlap_count = 0
-                with open(dict[0],"r") as file:
-                    for line in file:
-                        line = line.strip('\n')
-                        if line not in self.all_trys:
-                            current_dict.put(self.base_url + line)
-                            self.all_trys[line] = 0
-                        elif self.all_trys[line] == 1:
-                            overlap_count += 1
-                dict_size = current_dict.qsize()
-                for i in range(self.max_threads):
-                    threads.append(DictWorker(current_dict, self, dict_count))
-                for t in threads:
-                    t.start()
-                for t in threads:
-                    t.join()
-                valid_result_count = overlap_count + self.dict_stats[dict_count]
+            self.dict_stats.append(0)
+            threads = []
+            current_dict = queue.Queue()
+            overlap_count = 0
+            with open(dict[0],"r") as file:
+                for path in file:
+                    path = path.strip('\n')
+                    if dict[1] != '':
+                        path = path + "." + dict[1]
+                    if path not in self.all_trys:
+                        current_dict.put(path)
+                        self.all_trys[path] = 0
+                    elif self.all_trys[path] == 1:
+                        overlap_count += 1
+            dict_size = current_dict.qsize()
+            for i in range(self.max_threads):
+                threads.append(DictWorker(current_dict, self, dict_count))
+            for t in threads:
+                t.start()
+            for t in threads:
+                t.join()
+            valid_result_count = overlap_count + self.dict_stats[dict_count]
+            if dict[1] == '':
                 print("Dictionary: " + dict[0] + "; Size: " + str(dict_size) + "; Valid results: " + str(valid_result_count) + "; Hit rate: " +str(valid_result_count/dict_size))
             else:
-                for ext in dict[1]:
-                    self.dict_stats.append(0)
-                    threads = []
-                    current_dict = queue.Queue()
-                    overlap_count = 0
-                    with open(dict[0],"r") as file:
-                        for line in file:
-                            line = line.strip('\n')
-                            if self.base_url + line + "." + ext not in self.all_trys:
-                                current_dict.put(self.base_url + line + "." + ext)
-                                self.all_trys[line+ "." + ext] = 0
-                            elif self.all_trys[line+ "." + ext] == 1:
-                                overlap_count += 1
-                    dict_size = current_dict.qsize()
-                    for i in range(self.max_threads):
-                        threads.append(DictWorker(current_dict, self, dict_count))
-                    for t in threads:
-                        t.start()
-                    for t in threads:
-                        t.join()
-                    valid_result_count = overlap_count + self.dict_stats[dict_count]
-                    print("Dictionary: " + dict[0] + "; With extension: " + ext + "; Size: " + str(dict_size) + "; Valid results: " + str(valid_result_count) + "; Hit rate: " + str(valid_result_count/dict_size))
+                print("Dictionary: " + dict[0] + "; With extension: " + dict[1] + "; Size: " + str(dict_size) + "; Valid results: " + str(valid_result_count) + "; Hit rate: " + str(valid_result_count/dict_size))
         for redirected_url, redirect_count in self.redirect_list.items():
             print("Redirected to " + redirected_url + ": " + str(redirect_count) + " times")

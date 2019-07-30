@@ -24,10 +24,8 @@ python3 scan.py\
 --no-overlap: If put into the command, the program will run from dict1 to dict3, while avoiding overlapping trys; otherwise overlaps between different dictionary will be allowed (not implemented)
 
 #### TODO
-an optional and default path to save the result to\
-better redirected url handling\
 no overlap option for faster processing\
-changing structure of dict/extension implementation\
-changing stats to display hit rate with status code 200 and hit rate with all other status
-
+better redirected url handling\
+changing stats to display hit rate with status code 200 and hit rate with all other status\
+an optional and default path to save the result to\
 find common dicts/sensitive file names

@@ -31,7 +31,7 @@ class DictWorker(threading.Thread):
     def run(self):
         while not self.dict.empty():
             try:
-                url = self.dict.get_nowait()
+                url = self.scanner.base_url + self.dict.get_nowait()
                 session = requests.Session()
                 if self.scanner.user != '':
                     session.auth = (self.scanner.user, self.scanner.pwd)
