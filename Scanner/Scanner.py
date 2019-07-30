@@ -1,7 +1,9 @@
 __author__ = "Jayde Yue"
 # Website: www.jaydeyue.com
 
+
 import queue
+import time
 from DictWorker import DictWorker
 
 
@@ -127,7 +129,9 @@ class Scanner(object):
     def run(self):
         print("Scanning...Starts!")
         dict_count = 0
+        result_string = "Dictionary: {}; With extension: {}; Size: {}; Valid results: {}; Hit rate: {:.16%}; Process time: {:.6}"
         for dict in self.dict_paths:
+            start_time = time.time()
             self.dict_stats.append(0)
             threads = []
             current_dict = queue.Queue()
@@ -154,8 +158,9 @@ class Scanner(object):
                 t.join()
             valid_result_count = overlap_count + self.dict_stats[dict_count]
             if dict[1] == '':
-                print("Dictionary: " + dict[0] + "; Size: " + str(dict_size) + "; Valid results: " + str(valid_result_count) + "; Hit rate: " +str(valid_result_count/dict_size))
+                print(result_string.format(dict[0], None, dict_size, valid_result_count, valid_result_count/dict_size, time.time() - start_time))
             else:
-                print("Dictionary: " + dict[0] + "; With extension: " + dict[1] + "; Size: " + str(dict_size) + "; Valid results: " + str(valid_result_count) + "; Hit rate: " + str(valid_result_count/dict_size))
+                print(result_string.format(dict[0], dict[1], dict_size, valid_result_count, valid_result_count/dict_size, time.time() - start_time))
+            dict_count += 1
         for redirected_url, redirect_count in self.redirect_list.items():
             print("Redirected to " + redirected_url + ": " + str(redirect_count) + " times")
