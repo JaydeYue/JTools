@@ -137,11 +137,14 @@ class Scanner(object):
                     path = path.strip('\n')
                     if dict[1] != '':
                         path = path + "." + dict[1]
-                    if path not in self.all_trys:
+                    if self.allow_overlap:
                         current_dict.put(path)
-                        self.all_trys[path] = 0
-                    elif self.all_trys[path] == 1:
-                        overlap_count += 1
+                    else:
+                        if path not in self.all_trys:
+                            current_dict.put(path)
+                            self.all_trys[path] = 0
+                        elif self.all_trys[path] == 1:
+                            overlap_count += 1
             dict_size = current_dict.qsize()
             for i in range(self.max_threads):
                 threads.append(DictWorker(current_dict, self, dict_count))

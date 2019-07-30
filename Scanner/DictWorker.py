@@ -50,7 +50,8 @@ class DictWorker(threading.Thread):
                     elif response.status_code != 302:
                         print(response.url + ": " + str(response.status_code))
                         self.scanner.dict_stats[self.dict_number] +=1
-                        self.scanner.all_trys[url[len(self.scanner.base_url):]] = 1
+                        if not self.scanner.allow_overlap:
+                            self.scanner.all_trys[url[len(self.scanner.base_url):]] = 1
             except Exception as e:
                 print(e)
                 break

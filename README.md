@@ -21,10 +21,10 @@ python3 scan.py\
 -user username_for_authentication_purpose\
 -pwd password_for_authentication_purpose\
 --no-redirect: no redirecting\
---no-overlap: If put into the command, the program will run from dict1 to dict3, while avoiding overlapping trys; otherwise overlaps between different dictionary will be allowed (not implemented)
+--no-overlap: If put into the command, the program will run from dict1 to dict3, while avoiding repeated dictionary items; otherwise overlaps of paths between different dictionary will be allowed
 
 #### TODO
-no overlap option for faster processing\
+add timing of processing per dictionary\
 better redirected url handling\
 changing stats to display hit rate with status code 200 and hit rate with all other status\
 an optional and default path to save the result to\
