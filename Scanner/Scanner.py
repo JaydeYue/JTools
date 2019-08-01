@@ -10,6 +10,7 @@ from DictWorker import DictWorker
 class Scanner(object):
 
     def __init__(self, arguments):
+        # default parameters
         self.base_url = ''
         self.cookie = ''
         self.max_retrys = 3
@@ -21,21 +22,27 @@ class Scanner(object):
         self.dict_paths = []
         self.allow_overlap = True
         self.allow_redirect = True
+
+        # tracking mechanisms
         self.all_trys = {}
         self.dict_stats = []
         self.redirect_list = {}
 
         self.process_args(arguments)
-
         print("base_url: " + self.base_url)
         print("cookie: " + self.cookie)
         print("max_retrys: " + str(self.max_retrys))
         print("max_threads: " + str(self.max_threads))
         print("time_out: " + str(self.time_out))
+        print("referer: " + str(self.referer))
+        print("user: " + str(self.user))
+        print("pwd: " + str(self.pwd))
         print("allow_overlap: " + str(self.allow_overlap))
         print("allow_redirect: " + str(self.allow_redirect))
         print("scanning_dicts_path_with_added_extensions: ")
         print(self.dict_paths)
+        print("Scanning...Starts!")
+        print("--------------------------------------------------")
 
 
     def process_args(self, arguments):
@@ -127,7 +134,6 @@ class Scanner(object):
 
 
     def run(self):
-        print("Scanning...Starts!")
         dict_count = 0
         result_string = "Dictionary: {}; With extension: {}; Size: {}; Valid results: {}; Hit rate: {:.16%}; Process time: {:.6}"
         for dict in self.dict_paths:
@@ -162,5 +168,11 @@ class Scanner(object):
             else:
                 print(result_string.format(dict[0], dict[1], dict_size, valid_result_count, valid_result_count/dict_size, time.time() - start_time))
             dict_count += 1
-        for redirected_url, redirect_count in self.redirect_list.items():
-            print("Redirected to " + redirected_url + ": " + str(redirect_count) + " times")
+        for redirected_url, request_urls in self.redirect_list.items():
+            if len(request_urls) <= 5:
+                print("Those urls redirected to " + redirected_url + ": ")
+                for request_url in request_urls:
+                    print(request_url)
+            else:
+                print("Redirected to " + redirected_url + ": " + str(len(request_urls)) + " times")
+        print("--------------------------------------------------")

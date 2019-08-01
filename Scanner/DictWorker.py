@@ -29,10 +29,16 @@ class DictWorker(threading.Thread):
         session.mount('https://', adapter)
         return session
 
+    def procese_valid_url(self, request_url, response):
+        print(request_url + ": " + str(response.status_code))
+        self.scanner.dict_stats[self.dict_number] +=1
+        if not self.scanner.allow_overlap:
+            self.scanner.all_trys[request_url[len(self.scanner.base_url):]] = 1
+
     def run(self):
         while not self.dict.empty():
             try:
-                url = self.scanner.base_url + self.dict.get_nowait()
+                request_url = self.scanner.base_url + self.dict.get_nowait()
                 session = requests.Session()
                 if self.scanner.user != '':
                     session.auth = (self.scanner.user, self.scanner.pwd)
@@ -41,18 +47,19 @@ class DictWorker(threading.Thread):
                              'Referer': self.scanner.referer,
                              'Cookie': self.scanner.cookie,
                              })
-                response = self.request_with_retrys(session).get(url, timeout=self.scanner.time_out, allow_redirects=self.scanner.allow_redirect)
+                response = self.request_with_retrys(session).get(request_url, timeout=self.scanner.time_out, allow_redirects=self.scanner.allow_redirect)
                 if response.status_code != 404:
-                    if self.scanner.allow_redirect and len(response.history) > 0 and response.history[0].status_code == 302:
-                        if response.url not in self.scanner.redirect_list:
-                            self.scanner.redirect_list[response.url] = 1
+                    if self.scanner.allow_redirect:
+                        if len(response.history) > 0:
+                            if response.url not in self.scanner.redirect_list:
+                                self.scanner.redirect_list[response.url] = [request_url]
+                            else:
+                                self.scanner.redirect_list[response.url].append(request_url)
+                            # self.scanner.dict_stats[self.dict_number] +=1
                         else:
-                            self.scanner.redirect_list[response.url] += 1
-                    elif response.status_code != 302:
-                        print(response.url + ": " + str(response.status_code))
-                        self.scanner.dict_stats[self.dict_number] +=1
-                        if not self.scanner.allow_overlap:
-                            self.scanner.all_trys[url[len(self.scanner.base_url):]] = 1
+                            self.procese_valid_url(request_url, response)
+                    elif response.status_code != 302 and response.status_code != 301:
+                        self.procese_valid_url(request_url, response)
             except Exception as e:
                 print(e)
                 break

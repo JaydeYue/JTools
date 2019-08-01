@@ -27,4 +27,5 @@ python3 scan.py\
 better redirected url handling\
 changing stats to display hit rate with status code 200 and hit rate with all other status\
 an optional and default path to save the result to\
+better terminal output readability\
 find common dicts/sensitive file names
